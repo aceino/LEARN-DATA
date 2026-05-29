@@ -1,3 +1,4 @@
 .env
 v2-rest-api-generated.yaml
 logs/
+.vscode
