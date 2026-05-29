@@ -1,2 +1,3 @@
 .env
-.v2-rest-api-generated.yaml
+v2-rest-api-generated.yaml
+logs/
