@@ -1,0 +1,20 @@
+version : 2
+
+models :
+  - name : stg_adzuna__jobs
+    description : "cleaned job listing"
+
+    columns : 
+      - name : job_id
+        description : "Unique primary key for each job list"
+        data_tests: 
+          - unique
+          - not_null 
+
+      - name : job_title
+        description : "Title of the job list"
+        data_tests: 
+          - not_null 
+         
+      - name: job_url
+        description: "The clean web URL to the job posting, stripped of UTM tracking parameters."

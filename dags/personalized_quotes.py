@@ -1,5 +1,4 @@
 import os 
-import re
 
 from pendulum import datetime, duration  
 from airflow.sdk import Asset, dag, task 
@@ -45,6 +44,8 @@ def _get_lat_long(location):
         return (float(location_data.latitude), float(location_data.longitude))
     except Exception:
         return (0.0, 0.0)
+
+
 @dag( 
     start_date=datetime(2026, 5, 27),
     schedule=[Asset("formatted_newsletter")],
