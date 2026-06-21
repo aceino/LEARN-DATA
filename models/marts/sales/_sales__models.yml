@@ -1,0 +1,62 @@
+version: 2
+
+models:
+  - name: fct_orders
+    description: "Order fact table. One row per order with full sales context."
+    columns:
+      - name: order_id
+        description: "Primary key"
+        tests:
+          - unique
+          - not_null
+      - name: account_id
+        description: "FK to dim_accounts"
+        tests:
+          - not_null
+      - name: sales_reps_id
+        description: "FK to sales rep"
+        tests:
+          - not_null
+      - name: region_id
+        description: "FK to region"
+        tests:
+          - not_null
+      - name: ordered_at
+        description: "Timestamp of the order"
+        tests:
+          - not_null
+      - name: total_amt_usd
+        description: "Total order revenue in USD"
+        tests:
+          - not_null
+
+  - name: dim_accounts
+    description: "Account dimension. One row per account."
+    columns:
+      - name: account_id
+        description: "Primary key"
+        tests:
+          - unique
+          - not_null
+      - name: account_name
+        description: "Name of the account"
+        tests:
+          - not_null
+      - name: sales_reps_id
+        description: "FK to sales rep"
+        tests:
+          - not_null
+      - name: sales_reps_name
+        description: "Name of the sales representative"
+        tests:
+          - not_null
+      - name: region_id
+        description: "FK to region"
+        tests:
+          - not_null
+      - name: region_name
+        description: "Name of the region"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Northeast', 'Midwest', 'Southeast', 'West']
