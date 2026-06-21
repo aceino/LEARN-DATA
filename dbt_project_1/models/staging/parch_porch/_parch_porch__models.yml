@@ -1,0 +1,65 @@
+version : 2 
+
+models : 
+# ACCOUNTS
+  - name : stg_parch_porch_accounts
+    description : "cleaning accounts"
+    columns:
+      - name : account_id
+        data_test: 
+          - unique
+          - not_null 
+      - name : account_name 
+        data_test : 
+          - not_null
+          - relationships:
+            to: ref('stg_parch_porch_accounts')
+            field: sales_rep_id
+
+
+# ORDERS
+  - name : stg_parch_porch_orders
+    description : "cleaning orders"
+    columns:
+      - name : orders_id
+        data_test: 
+          - unique
+          - not_null 
+      - name : orderd_at
+        data_test : 
+          - not_null
+      - name : total
+        data_test: 
+          - not_null 
+
+# SALES_REPS
+  - name : stg_parch_porch_sales_reps
+    description : "cleaning orders"
+    columns:
+      - name : sales_reps_id
+        data_test: 
+          - unique
+          - not_null 
+      - name : sales_reps_name
+        data_test: 
+          - not_null
+          - relationships:
+            to: ref('stg_parch_porch_region')
+            field: region_id
+                 
+# WEB EVENTS
+  - name: stg_parch_porch_web_events
+    description: "Web channel events per account"
+    columns:
+      - name: web_event_id
+        tests:
+          - unique
+          - not_null
+      - name: account_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_parch_porch_accounts')
+              field: account_id
+                 
+       

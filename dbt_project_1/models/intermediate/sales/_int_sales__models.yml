@@ -1,0 +1,78 @@
+version: 2
+
+models:
+  - name: int_orders_joined_to_accounts
+    description: "Intermediate model joining orders with accounts, sales reps, and region information"
+    columns:
+      - name: order_id
+        description: "Unique identifier for the order"
+        tests:
+          - unique
+          - not_null
+
+      - name: ordered_at
+        description: "Timestamp when the order was placed"
+        tests:
+          - not_null
+
+      - name: standard_qty
+        description: "Quantity of standard items in the order"
+        tests:
+          - not_null
+
+      - name: gloss_qty
+        description: "Quantity of gloss items in the order"
+
+      - name: poster_qty
+        description: "Quantity of poster items in the order"
+
+      - name: total_qty
+        description: "Total quantity of items in the order"
+        tests:
+          - not_null
+
+      - name: standard_amt_usd
+        description: "Amount in USD from standard items"
+        tests:
+          - not_null
+
+      - name: gloss_amt_usd
+        description: "Amount in USD from gloss items"
+
+      - name: poster_amt_usd
+        description: "Amount in USD from poster items"
+
+      - name: total_amt_usd
+        description: "Total amount in USD for the order"
+        tests:
+          - not_null
+
+      - name: account_id
+        description: "Foreign key to the accounts table"
+        tests:
+          - not_null
+
+      - name: account_name
+        description: "Name of the account"
+        tests:
+          - not_null
+
+      - name: sales_reps_id
+        description: "Foreign key to the sales reps table"
+        tests:
+          - not_null
+
+      - name: sales_reps_name
+        description: "Name of the sales representative"
+        tests:
+          - not_null
+
+      - name: region_id
+        description: "Foreign key to the region table"
+        tests:
+          - not_null
+        
+      - name: region_name
+        description: "Name of the region"
+        tests:
+          - not_null
