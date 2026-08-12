@@ -1,0 +1,29 @@
+semantic_models:
+  - name: web_events
+    description: "Web events fact table. One row per event."
+    model: ref('fct_web_events')
+    defaults:
+      agg_time_dimension: visited_at
+
+    entities:
+      - name: web_event
+        type: primary
+        expr: web_event_id
+      - name: account
+        type: foreign
+        expr: account_id
+
+    dimensions:
+      - name: visited_at
+        type: time
+        expr: date_trunc('day', visited_at)
+        type_params:
+          time_granularity: day
+      - name: channel
+        type: categorical
+
+    measures:
+      - name: event_count
+        description: "Total number of web events"
+        agg: sum
+        expr: 1

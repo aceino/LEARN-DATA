@@ -1,0 +1,10 @@
+version: 2  
+
+models: 
+  - name: int_job_listing_group_by_regoin
+    description: "Intermediate model that standardizes messy, raw location strings into structured geographic regions."
+    columns:
+      - name: standardized_region
+        description: "The cleaned regional bucket (e.g., Greater London, Greater Manchester)."
+        data_tests:
+          - not_null

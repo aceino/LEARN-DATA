@@ -1,0 +1,94 @@
+services:
+  postgres:
+    image: debezium/postgres:16
+    container_name: cdc_postgres
+    restart: "no" # won't restart on crash or after reboot
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: cdc_demo
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./sql/postgres-init.sql:/docker-entrypoint-initdb.d/postgres-init.sql
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Kafka running in KRaft mode: it acts as its own broker AND controller,
+  # replacing what Zookeeper used to do. No separate zookeeper service needed.
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: cdc_kafka
+    restart: "no"
+    ports:
+      - "9092:9092"
+      - "9093:9093" # external listener, used for ngrok/Databricks access
+    environment:
+      # --- KRaft-specific settings (replace Zookeeper) ---
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29094
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      # Any fixed 22-character base64-style string works as a cluster ID —
+      # it just needs to stay the same across restarts of this same cluster.
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+
+      # --- Listener setup (same idea as before, plus a CONTROLLER listener) ---
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092,EXTERNAL://0.0.0.0:9093,CONTROLLER://0.0.0.0:29094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092,EXTERNAL://${NGROK_HOST:-localhost}:${NGROK_PORT:-9092}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  kafka-connect:
+    image: debezium/connect:2.6
+    container_name: cdc_kafka_connect
+    restart: "no"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:29092
+      GROUP_ID: cdc_connect_cluster
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      STATUS_STORAGE_TOPIC: connect_statuses
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8083/connectors"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Optional: lightweight UI to browse Kafka topics/messages in a browser
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: cdc_kafka_ui
+    restart: "no"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: connect
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
+  

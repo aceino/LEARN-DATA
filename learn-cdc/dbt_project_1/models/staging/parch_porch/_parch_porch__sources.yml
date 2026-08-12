@@ -1,0 +1,12 @@
+version : 2 
+
+sources :
+  - name : parch_porch
+    database : belajar_sql 
+    schema : public 
+    tables : 
+      - name : accounts
+      - name : orders
+      - name : region
+      - name : sales_reps
+      - name : web_events

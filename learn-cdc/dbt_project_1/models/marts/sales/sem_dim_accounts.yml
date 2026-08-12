@@ -1,0 +1,23 @@
+semantic_models:
+  - name: accounts
+    description: "Account dimension. One row per account."
+    model: ref('dim_accounts')
+
+    entities:
+      - name: account
+        type: primary
+        expr: account_id
+      - name: sales_rep
+        type: foreign
+        expr: sales_rep_id
+      - name: region
+        type: foreign
+        expr: region_id
+
+    dimensions:
+      - name: account_name
+        type: categorical
+      - name: sales_rep_name
+        type: categorical
+      - name: region_name
+        type: categorical

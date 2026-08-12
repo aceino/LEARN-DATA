@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: fct_web_events
+    description: "Web events fact table. One row per event."
+    columns:
+      - name: web_event_id
+        description: "Primary key"
+        tests:
+          - unique
+          - not_null
+      - name: account_id
+        description: "FK to dim_accounts"
+        tests:
+          - not_null
+      - name: visited_at
+        description: "Timestamp of the web event"
+        tests:
+          - not_null
+      - name: channel
+        description: "Marketing channel"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['direct', 'facebook', 'adwords', 'organic', 'twitter', 'banner']
