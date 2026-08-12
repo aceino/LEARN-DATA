@@ -62,8 +62,7 @@ def insert_customer(cur) :
     log.info(f"insert customer_id ={customer_id}")
     return customer_id 
 
-def insert_order(cur) :
-
+def insert_order(cur) :    
     # For PRODUCTS 
     cur.execute ("select product_id, unit_price from products order by random() limit 1")
     
@@ -157,6 +156,24 @@ def delete_random_row(cur):
         cur.execute("DELETE FROM customers WHERE customer_id = %s", (row[0],))
         log.info(f"DELETE customer id={row[0]}")
 
+def insert_product(cur): 
+    cur.execute(
+        """
+        INSERT INTO products (sku, name, description, unit_price)
+        VALUES (%s, %s,%s, %s)
+        RETURNING product_id
+        """,
+        (
+            fake.unique.bothify(text="SKU-####-????").upper(),
+            fake.word().capitalize(),
+            fake.sentence(nb_words=6),
+            round(random.uniform(5.0, 500.0), 2),
+        ),
+    )
+    product_id = cur.fetchone()[0]
+    log.info(f"insert product_id={product_id}")
+    return product_id
+
 def run_cycle(cur):
     ops = list(OP_WEIGHTS.keys())
     weights = list(OP_WEIGHTS.values())
@@ -183,14 +200,17 @@ def main():
         conn = get_connection()
         cur = conn.cursor() 
 
+        # for products
+        for _ in range (10 ): 
+            insert_order(cur)
+
         # seed a handful of customers so updates/deletes/orders have something to work with
-        for _   in range(10):
+        for _ in range(10):
             insert_customer(cur)
 
         while True:
             try:
                 run_cycle(cur)
-                time.sleep(SLEEP_SECONDS)
             except psycopg2.OperationalError as e : 
                 log.error(f"Database connection lost : {e}")
                 log.info("Attempting to reconnect")

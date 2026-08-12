@@ -17,7 +17,7 @@ log = logging.getLogger("search_index_consumer")
 # renames/combines) just the fields worth searching on.
 SEARCHABLE_FIELDS = {
     "customers": ["first_name", "last_name", "email"],
-    "orders": ["product", "status", "amount"],
+    "orders": ["product_id", "status", "total_amount"],
 }
 
 def build_search_document(table: str, row: dict) -> dict:

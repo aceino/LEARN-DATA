@@ -13,14 +13,14 @@ alter table customers replica identity full;
 create table if not exists orders ( 
     order_id serial primary key, 
     customer_id int references customers(customer_id), 
-    product_id int references orders(product_id), 
+    product_id int references products(product_id), 
     total_amount numeric(10,2) default 0,
     status text, 
     created_at timestamp default now(),
     updated_at timestamp default now()
 );
 
-lter table orders replica identity full; 
+alter table orders replica identity full; 
 
 create table if not exists products ( 
     product_id serial primary key , 

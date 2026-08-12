@@ -58,14 +58,15 @@ def update_cache(event: dict) :
         was_present = pk_value in CACHE[table]
         CACHE[table][pk_value] = event["after"]
         if op == "c":
-            CACHE_STATS["inserts"] += 1  # <-- ADD THIS
+            CACHE_STATS["inserts"] += 1  
         elif op == "u":
-            CACHE_STATS["updates"] += 1  # <-- ADD THIS
+            CACHE_STATS["updates"] += 1  
 
 def cache_summary() -> str: 
     parts = [f"{table}={len(rows)}" for table, rows in CACHE.items()]
     stats_parts = " ".join([f"{k}={v}" for k, v in CACHE_STATS.items() if v > 0]) 
-    return f"[cache] { " ".join(parts)} [stats] {stats_parts}"
+    
+    return f"[cache] {' '.join(parts)} [stats] {stats_parts}"
 
 def diff_fields(before: dict, after: dict):
     """Return only the fields that actually changed between before/after."""
@@ -74,8 +75,8 @@ def diff_fields(before: dict, after: dict):
     for k in keys:
         if before.get(k) != after.get(k):
             changed[k] = (before.get(k), after.get(k))
+ 
     return changed
-
 
 def format_event(event: dict) -> str:
     table = event["table"]
@@ -155,7 +156,7 @@ def main():
         *TOPICS,
         bootstrap_servers=BOOTSTRAP_SERVERS,
         auto_offset_reset="earliest",
-        enable_auto_commit=True,
+        enable_auto_commit=False,
         group_id="cdc_demo_consumer",
         value_deserializer=lambda v: json.loads(v.decode("utf-8")) if v else None,
     )
@@ -185,6 +186,9 @@ def main():
 
         except Exception as e : 
             log.error(f"Error processing message: {e}")
+
+    write_audit_row(cur, event)
+    consumer.commit()
 
 if __name__ == "__main__":
     main()
